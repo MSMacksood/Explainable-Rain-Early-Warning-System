@@ -1,0 +1,112 @@
+name: ci-cd
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  IMAGE_NAME: sl-rain-early-warning
+  REGISTRY: ${{ vars.ARTIFACT_REGISTRY || 'europe-west1-docker.pkg.dev/PROJECT/repo' }}
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install ruff pytest httpx
+      - name: Lint (ruff)
+        run: ruff check src app tests
+      - name: Unit + integration tests
+        run: pytest tests -q
+
+  build-image:
+    needs: lint-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pull model artifacts (DVC)
+        run: |
+          pip install dvc[gs]
+          dvc pull models/catboost_rain.cbm models/catboost_precip_amount.cbm \
+                   models/feature_spec.joblib || echo "No DVC remote configured — using committed artifacts"
+      - name: Build Docker image
+        run: docker build -t $IMAGE_NAME:${{ github.sha }} .
+      - name: Smoke test container
+        run: |
+          docker run -d --name smoke -p 8080:8080 $IMAGE_NAME:${{ github.sha }}
+          sleep 15
+          curl --fail http://localhost:8080/health
+          docker rm -f smoke
+      - name: Authenticate to Google Cloud
+        if: vars.GCP_WORKLOAD_IDP != ''
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDP }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Push image
+        if: vars.GCP_WORKLOAD_IDP != ''
+        run: |
+          gcloud auth configure-docker $(echo $REGISTRY | cut -d/ -f1) --quiet
+          docker tag $IMAGE_NAME:${{ github.sha }} $REGISTRY/$IMAGE_NAME:${{ github.sha }}
+          docker push $REGISTRY/$IMAGE_NAME:${{ github.sha }}
+
+  deploy:
+    needs: build-image
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && vars.GCP_WORKLOAD_IDP != ''
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDP }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      - name: Deploy to Cloud Run (canary 10% -> full)
+        run: |
+          gcloud run deploy sl-rain-early-warning \
+            --image $REGISTRY/$IMAGE_NAME:${{ github.sha }} \
+            --region ${{ vars.GCP_REGION || 'asia-south1' }} \
+            --platform managed --allow-unauthenticated \
+            --min-instances 0 --max-instances 5 \
+            --tag canary --no-traffic
+          gcloud run services update-traffic sl-rain-early-warning \
+            --to-tags canary=10
+          sleep 60
+          gcloud run services update-traffic sl-rain-early-warning \
+            --to-latest
+
+  drift-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run drift monitor (non-blocking report)
+        run: |
+          python -m app.monitoring --config config/config.yaml || \
+            echo "::warning::Drift alert raised — schedule retraining"
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: reports/drift/
+        if: always()

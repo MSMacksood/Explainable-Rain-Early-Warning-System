@@ -1,0 +1,71 @@
+{
+  "n_rows": 147480,
+  "n_cols": 24,
+  "n_cities": 30,
+  "date_min": "2010-01-01",
+  "date_max": "2023-06-17",
+  "missing_by_col": {
+    "time": 0,
+    "weather_code": 0,
+    "temperature_2m_max": 0,
+    "temperature_2m_min": 0,
+    "temperature_2m_mean": 0,
+    "apparent_temperature_max": 0,
+    "apparent_temperature_min": 0,
+    "apparent_temperature_mean": 0,
+    "sunrise": 0,
+    "sunset": 0,
+    "shortwave_radiation_sum": 0,
+    "precipitation_sum": 0,
+    "rain_sum": 0,
+    "snowfall_sum": 0,
+    "precipitation_hours": 0,
+    "windspeed_10m_max": 0,
+    "windgusts_10m_max": 0,
+    "winddirection_10m_dominant": 0,
+    "et0_fao_evapotranspiration": 0,
+    "latitude": 0,
+    "longitude": 0,
+    "elevation": 0,
+    "country": 0,
+    "city": 0
+  },
+  "numeric_columns": [
+    "temperature_2m_max",
+    "temperature_2m_min",
+    "temperature_2m_mean",
+    "apparent_temperature_max",
+    "apparent_temperature_min",
+    "apparent_temperature_mean",
+    "shortwave_radiation_sum",
+    "precipitation_sum",
+    "precipitation_hours",
+    "windspeed_10m_max",
+    "windgusts_10m_max",
+    "winddirection_10m_dominant",
+    "et0_fao_evapotranspiration",
+    "latitude",
+    "longitude",
+    "elevation"
+  ],
+  "categorical_columns": [
+    "city",
+    "country",
+    "weather_code"
+  ],
+  "constraints": {
+    "instances_ge_15000": true,
+    "mixed_types": true,
+    "supervised_targets": true,
+    "realistic_challenges": true,
+    "supports_all_phases": true
+  },
+  "rain_day_share": 0.6566653105505831,
+  "all_pass": true,
+  "cleaning_audit": {
+    "duplicates_dropped": 0,
+    "negative_precip_clipped": 0,
+    "values_imputed": 0,
+    "code_precip_inconsistencies": 0
+  }
+}

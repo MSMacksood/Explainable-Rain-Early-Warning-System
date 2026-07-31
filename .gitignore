@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+mlruns/
+mlflow.db
+models/*.cbm
+models/*.joblib
+reports/prediction_log.jsonl
+catboost_info/
+.dvc/cache

@@ -1,0 +1,71 @@
+stages:
+  data_prep:
+    cmd: python -m src.data_prep --config config/config.yaml
+    deps:
+      - src/data_prep.py
+      - data/raw/SriLanka_Weather_Dataset.csv
+    params:
+      - config/config.yaml:
+          - data
+          - target
+    outs:
+      - data/processed/clean.parquet
+    metrics:
+      - reports/data_validation.json:
+          cache: false
+
+  features:
+    cmd: python -m src.features --config config/config.yaml
+    deps:
+      - src/features.py
+      - data/processed/clean.parquet
+    params:
+      - config/config.yaml:
+          - features
+    outs:
+      - data/processed/features.parquet
+    metrics:
+      - reports/feature_report.json:
+          cache: false
+
+  train:
+    cmd: python -m src.train --config config/config.yaml
+    deps:
+      - src/train.py
+      - data/processed/features.parquet
+    params:
+      - config/config.yaml:
+          - cv
+          - optuna
+          - imbalance
+          - models
+    outs:
+      - models/catboost_rain.cbm
+      - models/catboost_precip_amount.cbm
+      - models/feature_spec.joblib
+    metrics:
+      - reports/training_report.json:
+          cache: false
+
+  evaluate:
+    cmd: python -m src.evaluate --config config/config.yaml
+    deps:
+      - src/evaluate.py
+      - models/catboost_rain.cbm
+      - models/catboost_precip_amount.cbm
+      - data/processed/features.parquet
+    outs:
+      - models/decision_threshold.json:
+          cache: false
+    metrics:
+      - reports/evaluation_report.json:
+          cache: false
+
+  explain:
+    cmd: python -m src.explain --config config/config.yaml
+    deps:
+      - src/explain.py
+      - models/catboost_rain.cbm
+    outs:
+      - reports/explainability:
+          cache: false

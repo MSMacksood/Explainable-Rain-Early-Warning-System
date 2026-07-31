@@ -1,0 +1,101 @@
+{
+  "top10_shap": [
+    {
+      "feature": "precipitation_hours",
+      "mean_abs_shap": 0.7178576657937533
+    },
+    {
+      "feature": "precip_to_et",
+      "mean_abs_shap": 0.342219772918491
+    },
+    {
+      "feature": "precipitation_sum",
+      "mean_abs_shap": 0.3210099571828201
+    },
+    {
+      "feature": "monsoon_phase",
+      "mean_abs_shap": 0.23548687544454486
+    },
+    {
+      "feature": "precip_lag2",
+      "mean_abs_shap": 0.189548220549343
+    },
+    {
+      "feature": "climate_zone",
+      "mean_abs_shap": 0.1867921005611871
+    },
+    {
+      "feature": "et0_fao_evapotranspiration",
+      "mean_abs_shap": 0.18012131321774852
+    },
+    {
+      "feature": "rh_proxy",
+      "mean_abs_shap": 0.1784297951205932
+    },
+    {
+      "feature": "month_cos",
+      "mean_abs_shap": 0.16014125360920575
+    },
+    {
+      "feature": "windspeed_10m_max",
+      "mean_abs_shap": 0.15191575085312037
+    }
+  ],
+  "top10_permutation": [
+    {
+      "feature": "precipitation_hours",
+      "importance_mean": 0.02112082064782783,
+      "importance_std": 0.0018411953087950452
+    },
+    {
+      "feature": "precip_to_et",
+      "importance_mean": 0.01416412746465586,
+      "importance_std": 0.0006796454279629024
+    },
+    {
+      "feature": "precip_anom_15d",
+      "importance_mean": 0.006932469770534892,
+      "importance_std": 0.0002966745563517323
+    },
+    {
+      "feature": "precip_anom_7d",
+      "importance_mean": 0.006446994436728359,
+      "importance_std": 0.0003090247389547888
+    },
+    {
+      "feature": "windspeed_10m_max",
+      "importance_mean": 0.00526762204312962,
+      "importance_std": 0.0006289228754235611
+    },
+    {
+      "feature": "precip_anom_30d",
+      "importance_mean": 0.005169826816266802,
+      "importance_std": 0.0002983620840657952
+    },
+    {
+      "feature": "precipitation_sum",
+      "importance_mean": 0.0046082315157042935,
+      "importance_std": 0.0007787243114071065
+    },
+    {
+      "feature": "shortwave_radiation_sum",
+      "importance_mean": 0.0035313501323396648,
+      "importance_std": 0.0002362725961498933
+    },
+    {
+      "feature": "precip_lag3",
+      "importance_mean": 0.0031839429503262386,
+      "importance_std": 0.00016483878647052377
+    },
+    {
+      "feature": "wind_u",
+      "importance_mean": 0.003100728353904255,
+      "importance_std": 0.00024373187838497922
+    }
+  ],
+  "local_case_rows": [
+    1760,
+    1159,
+    1952
+  ]
+}
