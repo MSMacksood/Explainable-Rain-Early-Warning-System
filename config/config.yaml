@@ -1,0 +1,58 @@
+# Central configuration — Sri Lanka Monsoon-Aware Early-Warning System
+seed: 42
+
+data:
+  kaggle_dataset: "rasulmah/sri-lanka-weather-dataset"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  raw_csv: "data/raw/SriLanka_Weather_Dataset.csv"
+  processed_parquet: "data/processed/features.parquet"
+  min_instances: 15000            # Phase-0 hard constraint
+
+target:
+  rain_threshold_mm: 1.0          # rain_tomorrow := precip(t+1) > 1.0 mm
+  classification: "rain_tomorrow"
+  regression: "precip_tomorrow"
+
+features:
+  anomaly_windows: [7, 15, 30]
+  lag_days: [1, 2, 3, 7]
+  anomaly_clip: 10.0
+  corr_filter_threshold: 0.95
+
+cv:
+  n_splits: 5
+  embargo_days: 1                 # gap between train and validation blocks
+
+optuna:
+  n_trials: 15                    # demo budget; set 100 for full runs
+  timeout_seconds: 1200
+  primary_metric: "pr_auc"
+
+imbalance:
+  strategy: "class_weight"        # class_weight | smote (fold-internal only)
+
+models:
+  families: ["logistic", "knn", "random_forest", "lightgbm", "xgboost", "catboost", "mlp", "lstm"]
+  knn_max_train_rows: 40000       # subsample cap for KNN tractability
+  lstm:
+    lookback: 7
+    hidden_size: 64
+    epochs: 8
+    batch_size: 512
+    lr: 0.001
+
+thresholds:
+  beta: 2.0                       # F-beta for threshold tuning (recall-weighted)
+
+serving:
+  model_path: "models/catboost_rain.cbm"
+  threshold_path: "models/decision_threshold.json"
+
+monitoring:
+  drift_alpha: 0.05               # KS / Chi-square significance
+  drift_share_alert: 0.3          # alert if >30% of features drift
+
+mlflow:
+  tracking_uri: "file:./mlruns"
+  experiment: "sl-weather-early-warning"
