@@ -1,0 +1,23 @@
+pandas==2.3.3
+numpy>=1.26,<3
+scikit-learn==1.7.2
+catboost==1.2.8
+lightgbm==4.6.0
+xgboost==3.0.5
+optuna==4.5.0
+shap==0.48.0
+imbalanced-learn==0.14.0
+statsmodels==0.14.5
+matplotlib==3.10.6
+pyyaml==6.0.3
+joblib==1.5.2
+fastapi==0.118.3
+uvicorn[standard]==0.37.0
+pydantic==2.12.3
+mlflow==3.5.0
+evidently==0.7.14
+kagglehub==0.3.13
+scipy>=1.11
+pyarrow>=15
+# Optional deep-learning benchmark (CPU build):
+# torch==2.6.0
